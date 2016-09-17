@@ -1,139 +1,93 @@
-// Source code used for task 4 in Laboration 2, 1DT100, Datateknik - introduktion med projektarbete, HT 2016
+// Source code used for task 2 and 3 in Laboration 1, 1DT100, Datateknik - introduktion med projektarbete, HT 2016
 //
-// Name: Arduino-Based Calculator
+// Name: Advanced Toggleable Solid/Blink
 // Author: Martin Lyrå
-// Date (of creation): 2016-09-17
-// Libraries: 
-//	* Keypad
+// Date (of creation): 2016-09-14
 
-// Here, we are no longer considering original code. Fullfilling our goal of making a simple calculator is now important.
-#include <Keypad.h> //vital for our keypad
 
-// #define FLIP_PINS
-
-// easy pin setup
-byte out_pins[] = {5,4,3,2};	// alias column_pins
+// For easy setup using 'for' loop(s)
+int out_pins[] = {0,1,2,3,4,5,6,7,8,9,10,11};
 int max_out_pins = sizeof(out_pins)/sizeof(out_pins[0]); 
 
-byte in_pins[] = {9,8,7,6};		// alias row_pins;
+// Comment for previous line:
+// sizeof() on an array will return its size in memory,
+// while sizeof on the first element returns the size of THAT element.
+// sizeof({0,1,2}) returns the same value as 3*sizeof(int). 
+// Because there are three 'int's in the array.
+// Now apply the assignment as an equation: 12*sizeof(int)/sizeof(int)
+// The answer? 12. - Because a/a = 1 and in this case the sizeof(int) is the 'a'
+
+int in_pins[] = {13};
 int max_in_pins = sizeof(in_pins)/sizeof(in_pins[0]);
+// end easy pin setup
 
-// for when you realize you put the pins in proper order. When it has to be reversed
-#ifdef FLIP_PINS
-out_pins = {2,3,4,5};
-in_pins = {6,7,8,9};
-#endif
+int button_input_pin = 13;
+int button_pressed = LOW; // HIGH (true) the entire time it is being held
+int button_state = LOW;
 
-// NOTE: Not all keypads have the same order of pins for I/O, they can have a different number of pins.
-// Specially when the matrix (row x columns) are different.
+unsigned long previousMillis, currentMillis = 0; // for our beautiful intevals
+#define INTERVAL(x) (currentMillis - previousMillis >= x)
 
-#define ROWS 	4
-#define COLUMNS 4
+// 1 sec = 1000 ms
+#define ONE_SECOND 1000
 
-char keys[ROWS][COLUMNS] =
-{
-  '1','2','3','A',
-  '4','5','6','B',
-  '7','8','9','C',
-  '*','0','#','D'
-};
+const int USE_PULLUP = 1;
 
-Keypad kpd = Keypad( makeKeymap(keys), in_pins, out_pins, ROWS, COLUMNS );
-
-// Calculator things
-
-double result			= 0;	// For previous calculations included in the new calculation
-String calc_buffer		= ""; 	// we need somewhere to keep the data
-byte operation_mode		= 0;
-#define ADD 0
-#define SUB 1
-#define MUL 2
-#define DIV 3
-
-#define ADD_CHAR 'A'
-#define SUB_CHAR 'B'
-#define DIV_CHAR 'C'
-#define REM_CHAR 'D'
-#define MUL_CHAR '*'
-#define EQU_CHAR '#'
-
-void calculate();
+// Since this is a language derived from C/C++, forward declaraions (declaration before use) is a must.
+void buttonReadToggle(int pin, int* pressed_state, int* state);
 
 void setup() {
-  Serial.begin(9600);
-  while (!Serial) 
+  // Setup all output pins defined in out_pins
+  for (int i = 0; i < max_out_pins; i++)
   {
-    // wait for the establishment and confirmation of the Serial connection, for native USB connections.
+    pinMode(out_pins[i],OUTPUT);
   }
-  Serial.println("To reset the calculations, press on the onboard reset button.");
+
+  // Setup all input pins defined in in_pins
+  for (int i = 0; i < max_in_pins; i++)
+  {
+    pinMode(in_pins[i], (USE_PULLUP ? INPUT_PULLUP : INPUT)); // if USE_PULLUP is 1, use INPUT_PULLUP, else use INPUT ( statement ? true : fale )
+  }
 }
 
 void loop() {
-  char key = kpd.getKey();  // self-explainatory? it gets the currently pressed key
   
-  if (key != NO_KEY) {
-    //Serial.println(key); // for debugging the input
-    switch (key){
-      case EQU_CHAR : { // equal, when pressing #
-        calculate();
-        operation_mode = 0;
-        break;
-      }
-      case ADD_CHAR : { // addition, when pressing A
-        calculate();
-        operation_mode = ADD;
-        break;
-      }
-      case SUB_CHAR : { // subtraction, when pressing B
-        calculate();
-        operation_mode = SUB;
-        break;
-      }
-      case DIV_CHAR : { // division, when pressing C
-        calculate();
-      	operation_mode = DIV;
-        break;
-      }
-      case MUL_CHAR : { // multiplication, when pressing *
-        calculate();
-       	operation_mode = MUL;
-        break;
-      }
-      case REM_CHAR : { // undo the last step, when pressing D
-       	calc_buffer.remove(calc_buffer.length()-1,1); //removes the last char
-        break;
-      }
-      default : { // all the numbers!
-       	if (calc_buffer == "0") // replace 0 with other digits, because [integer] numbers do not start with zero
-          calc_buffer = "";
-        calc_buffer += key;
-        break;
-      }
-    }
-    //Serial.println(calc_buffer); // for debugging the output
-    
-    Serial.print(result); 
-  	switch (operation_mode) {
-   		case ADD : Serial.print("\t + \t"); break;
-    	case SUB : Serial.print("\t - \t"); break;
-    	case DIV : Serial.print("\t / \t"); break;
-    	case MUL : Serial.print("\t * \t"); break;
-  	}
-  	Serial.println(calc_buffer);
-  }
-  delay(1);
-}
+  currentMillis = millis();
+  
+  buttonReadToggle(button_input_pin, &button_pressed, &button_state);
 
-void calculate() // Calculate the result depending on the operation mode. Print result. Clear buffer. Move on.
-{
-  Serial.print(result); 
-  switch (operation_mode) {
-   	case ADD : result += calc_buffer.toInt(); Serial.print("\t + \t"); break;
-    case SUB : result -= calc_buffer.toInt(); Serial.print("\t - \t"); break;
-    case DIV : result /= calc_buffer.toInt(); Serial.print("\t / \t"); break;
-    case MUL : result *= calc_buffer.toInt(); Serial.print("\t * \t"); break;
+  if (currentMillis - previousMillis >= ONE_SECOND)
+  {
+    // lit up the LEDs connected to pins as defined in out_pins. Given that they are shunted (as in parallel connection) to a 10k ohm resistor, connected to one of the GND (GrouNDing) pin outlets.
+    // daisy-connecting the LEDs (chain/serial connection) will just lit the LED and shut off the LED in the previous iteration.
+
+    for (int i = 0; i < max_out_pins; i++)
+    {
+      digitalWrite(out_pins[i],HIGH);
+      delay(10);
+    }
+    
+    // in the first mode, the previous lit lamps will turned off by one and one after a barely noticeable delay (0.1 seconds), else they still stay lit
+    if (!button_state && INTERVAL(100))
+      for (int i = 0; i < max_out_pins; i++)
+      {
+        digitalWrite(out_pins[i],LOW);  
+        delay(10);
+      }
   }
-  Serial.println(calc_buffer);
-  Serial.print("\t= "); Serial.println(result); // print the result
-  calc_buffer = ""; // clear the buffer
+}
+  //delay(ONE_SECOND); // <-- Inpractical for responsive setups, but fast and cheap. Application of millis() is more efficient and responsive, but complex.
+
+
+// Function for controlling the button. If the button is being held, this function still considers it as a single press. Press again to change again.
+// It uses pointers to variables (pressed_state and state, passed by reference) so it can modify them here rather than adapting to a more complex [spaghetti] code.
+void buttonReadToggle(int pin, int* pressed_state, int* state)
+{
+  if (digitalRead(pin))
+  {
+     if (!*pressed_state) // is it the first time we do this? If yes, do this. Otherwise, don't.
+      *state = !*state;   // this is a TOGGLE function, assignment using the ! operator "toggles" the state.
+     *pressed_state = 1;  // Go on, there is nothing to see anymore.
+  } else
+    *pressed_state = 0;   // Since we are not using the button anymore. Take down the barrier so we can use the button again.
 }
