@@ -73,7 +73,7 @@ void loop() {
         state_map[2][steps - 18] = 1;
     }
     //state_map[(int)floor(steps/COLUMNS)][(int)floor(steps/LAYERS)] = 1; // we did an experiment, using floor to terminate decimals from steps - but it did not go as expected
-    PM = CM;  // timestamp since last we did this, for when the next interval should occur
+    PM = CM;  // timestamp since last when we did this, for when the next interval should occur
     steps = steps == 27 ? 0 : steps + 1;  // check if we already taken 27 steps (0,1,2, ... , 26), reset to 0. Else take another step 
   }
 }
