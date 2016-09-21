@@ -112,7 +112,7 @@ void loop() {
     for (int i = 0; i < LAYERS; i++)                // copy the selected animation state to the state map
       for (int c = 0; c < COLUMNS;c++)
         state_map[i][c] = animation_map[steps][i][c];
-    PM = CM;                            // timestamp since last we did this, for when the next interval should occur
+    PM = CM;                            // timestamp since last when we did this, for when the next interval should occur
     steps = steps > 2 ? 0 : steps + 1;  // check if we already taken four steps (0,1,2,3), reset to 0. Else take another step 
   }
 }
