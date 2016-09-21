@@ -16,14 +16,15 @@ int max_low_pins = sizeof(low_pins)/sizeof(low_pins[0]);
 // There are 9 columns, starting from 0 to 8, pins 2 to 10 (see high_pins)
 int state_map[LAYERS][COLUMNS] = 
 {
-  {0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0}
+  {0,0,0,0,0,0,0,0,0}, // first layer
+  {0,0,0,0,0,0,0,0,0}, // second layer
+  {0,0,0,0,0,0,0,0,0}  // third layer
 };
 
 // how many frames do we have got?
 #define FRAMES 4
 
+// This is where we hold our beautiful animation frames, an array of pre-defined state_maps to use.
 int animation_map[FRAMES][LAYERS][COLUMNS] = 
 {
   { // '-'                   first frame
@@ -111,7 +112,7 @@ void loop() {
     for (int i = 0; i < LAYERS; i++)                // copy the selected animation state to the state map
       for (int c = 0; c < COLUMNS;c++)
         state_map[i][c] = animation_map[steps][i][c];
-    PM = CM;                            // timestamp since we did this last
+    PM = CM;                            // timestamp since last we did this, for when the next interval should occur
     steps = steps > 2 ? 0 : steps + 1;  // check if we already taken four steps (0,1,2,3), reset to 0. Else take another step 
   }
 }
