@@ -109,7 +109,7 @@ void loop() {
   // Check if 500 ms (maximium) has elapsed, the interval is smaller as the more displaced the accelerometer becomes
   if (CM - PM >= interval*accelval)
   {
-    for (int i = 0; i < LAYERS; i++)                // copy the selected animation state to the state map
+    for (int i = 0; i < LAYERS; i++)                // copy the selected animation state to the state map, the amount of steps taken determinates which frame to use
       for (int c = 0; c < COLUMNS;c++)
         state_map[i][c] = animation_map[steps][i][c];
     PM = CM;                            // timestamp since last when we did this, for when the next interval should occur
