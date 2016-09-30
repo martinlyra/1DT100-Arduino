@@ -1,32 +1,12 @@
-  // mouseover serial
-
-  // Demonstrates how to send data to the Arduino I/O board, in order to
-  // turn ON a light if the mouse is over a square and turn it off
-  // if the mouse is not.
-
-  // created 2003-4
-  // based on examples by Casey Reas and Hernando Barragan
-  // modified 30 Aug 2011
-  // by Tom Igoe
-  // This example code is in the public domain.
-
-
+  // This code is based of the "Mouseover Serial" example code from Arduino.cc
 
   import processing.serial.*;
-
-  float boxX;
-  float boxY;
-  int boxSize = 20;
-  boolean mouseOverBox = false;
 
   Serial port;
 
   void setup() {
-  size(200, 200);
-  boxX = width/2.0;
-  boxY = height/2.0;
-  rectMode(RADIUS);
-
+  // The two comment blocks below here are from the example code.
+  
   // List all the available serial ports in the output pane.
   // You will need to choose the port that the Arduino board is
   // connected to from this list. The first port in the list is
@@ -37,129 +17,54 @@
   // Open the port that the Arduino board is connected to (in this case #0)
   // Make sure to open the port at the same speed Arduino is using (9600bps)
   port = new Serial(this, Serial.list()[2], 9600);
-
   }
 
-  String val;
+  String val;           // The string we get from reading the serial connection
   
-  int buttonState;
-  float fvalX, fvalY;
+  int buttonState;      // Where we keep whether the button is being pressed or not
+  float fvalX, fvalY;   // Float factor values determinating the result
 
   void draw()
   {
-    if (port.available() > 0)
-      val = port.readStringUntil('\n');
+    if (port.available() > 0)           // is data being sent?
+      val = port.readStringUntil('\n'); // read the serial connection
     
-    if (val != null)
+    if (val != null)                    // if there was no data, skip
     {
-      println(val);
+      println(val);                     // debugging purposes
       
-      int splitterIndex = val.indexOf(";");
+      int splitterIndex = val.indexOf(";"); // where is the ';' located? we need this for splitting the string into more useable data
       
-      /*
-      float valX = float(val.substring(0, splitterIndex - 1));
-      float valY = float(val.substring(splitterIndex, val.length()-1));
-      */
+      // since start off with incomplete strings because there are no UDP or TCP data transfer protocols,
+      // sometimes the data are cut, try processing the data, else spit and try again
+      //
+      // the string is formated like this:
+      // B<buttonstate>X:<valX>;Y:<valY>
+      // for example it'd be
+      // B0X:-0.45;Y:0.12     where valX = -0.45 and valY = 0.12 and the button is not being held (0)
+      // B1X:1.0;Y:0.23      where valX = 1.0 and valY = 0.23 and the button is being held (1)
       try
       {
-        String button = val.substring(1,2);
-        String valX = val.substring(2+2, splitterIndex);
-        String valY = val.substring(splitterIndex + (1+2), val.length()-1);
+        String button = val.substring(1,2);               // get the buttonstate
+        String valX = val.substring(2+2, splitterIndex);  // get the X value
+        String valY = val.substring(splitterIndex + (1+2), val.length()-1); // get the Y value
         
-        fvalX = float(valX);
-        fvalY = float(valY);
-        buttonState = int(button);
+        fvalX = float(valX); // parse the string into a number
+        fvalY = float(valY); // same here
         
-        println("Value for X: " + fvalX + "\nValue for Y: " + fvalY);
-        println("Should be drawn?: " + (boolean(buttonState) ? "Yes" : "No"));
+        println("Value for X: " + fvalX + "\nValue for Y: " + fvalY); // output it! for debugging needs
       }
       catch (Exception exception)
       {
-        println(exception);
+        println(exception); // Hah, we caught a fault, no problem!
       }
       
-      background(51);
+      background(51); // Paint it dark.
       
-      if (buttonState == 1)
+      if (buttonState == 1) // don't draw the line if the button is not being held
       {
-        stroke(244);
-        line(100, 100, 200*fvalX, 200*fvalY);
+        stroke(244);    // Makes the line being drawn white
+        line(100, 100, 200*fvalX, 200*fvalY); // the line starts at {100,100} and ends at {200*fvalX,200*fvalY}
       }
     }
   }
-  
-
-  /*void draw()
-  {
-  background(0);
-
-  // Test if the cursor is over the box
-  if (mouseX > boxX-boxSize && mouseX < boxX+boxSize &&
-  mouseY > boxY-boxSize && mouseY < boxY+boxSize) {
-  mouseOverBox = true;
-  // draw a line around the box and change its color:
-  stroke(255);
-  fill(153);
-  // send an 'H' to indicate mouse is over square:
-  port.write('H');
-  }
-  else {
-  // return the box to it's inactive state:
-  stroke(153);
-  fill(153);
-  // send an 'L' to turn the LED off:
-  port.write('L');
-  mouseOverBox = false;
-  }
-
-  // Draw the box
-  rect(boxX, boxY, boxSize, boxSize);
-  }*/
-
-
-/*
- Max/MSP version 5 patch to run with this example:
-
- ----------begin_max5_patcher----------
- 1672.3oc2ZszaaiCD9ryuBBebQVCQRYao8xhf1cQCPVfBzh8RRQ.sDsM2HSZ
- HQmlzh9eu7gjsjsEk7y0oWjiHoHm4aluYHGlueUmtiDuPy5B9Cv8fNc99Uc5
- XZR2Pm726zcF4knDRlYXciDylQ4xtWa6SReQZZ+iSeMiEQR.ej8BM4A9C7OO
- kkAlSjQSAYTdbFfvA27o2c6sfO.Doqd6NfXgDHmRUCKkolg4hT06BfbQJGH3
- 5Qd2e8d.QJIQSow5tzebZ7BFW.FIHow8.2JAQpVIIYByxo9KIMkSjL9D0BRT
- sbGHZJIkDoZOSMuQT.8YZ5qpgGI3locF4IpQRzq2nDF+odZMIJkRjpEF44M3
- A9nWAum7LKFbSOv+PSRXYOvmIhYiYpg.8A2LOUOxPyH+TjPJA+MS9sIzTRRr
- QP9rXF31IBZAHpVHkHrfaPRHLuUCzoj9GSoQRqIB52y6Z.tu8o4EX+fddfuj
- +MrXiwPL5+9cXwrOVvkbxLpomazHbQO7EyX7DpzXYgkFdF6algCQpkX4XUlo
- hA6oa7GWck9w0Gnmy6RXQOoQeCfWwlzsdnHLTq8n9PCHLv7Cxa6PAN3RCKjh
- ISRVZ+sSl704Tqt0kocE9R8J+P+RJOZ4ysp6gN0vppBbOTEN8qp0YCq5bq47
- PUwfA5e766z7NbGMuncw7VgNRSyQhbnPMGrDsGaFSvKM5NcWoIVdZn44.eOi
- 9DTRUT.7jDQzSTiF4UzXLc7tLGh4T9pwaFQkGUGIiOOkpBSJUwGsBd40krHQ
- 9XEvwq2V6eLIhV6GuzP7uzzXBmzsXPSRYwBtVLp7s5lKVv6UN2VW7xRtYDbx
- 7s7wRgHYDI8YVFaTBshkP49R3rYpH3RlUhTQmK5jMadJyF3cYaTNQMGSyhRE
- IIUlJaOOukdhoOyhnekEKmZlqU3UkLrk7bpPrpztKBVUR1uorLddk6xIOqNt
- lBOroRrNVFJGLrDxudpET4kzkstNp2lzuUHVMgk5TDZx9GWumnoQTbhXsEtF
- tzCcM+z0QKXsngCUtTOEIN0SX2iHTTIIz968.Kf.uhfzUCUuAd3UKd.OKt.N
- HTynxTQyjpQD9jlwEXeKQxfHCBahUge6RprSa2V4m3aYOMyaP6gah2Yf1zbD
- jVwZVGFZHHxINFxpjr5CiTS9JiZn6e6nTlXQZTAFj6QCppQwzL0AxVtoi6WE
- QXsANkEGWMEuwNvhmKTnat7A9RqLq6pXuEwY6xM5xRraoTiurj51J1vKLzFs
- CvM7HI14Mpje6YRxHOSieTsJpvJORjxT1nERK6s7YTN7sr6rylNwf5zMiHI4
- meZ4rTYt2PpVettZERbjJ6PjfqN2loPSrUcusH01CegsGEE5467rnCdqT1ES
- QxtCvFq.cvGz+BaAHXKzRSfP+2Jf.KCvj5ZLJRAhwi+SWHvPyN3vXiaPn6JR
- 3eoA.0TkFhTvpsDMIrL20nAkCI4EoYfSHAuiPBdmJRyd.IynYYjIzMvjOTKf
- 3DLvnvRLDLpWeEOYXMfAZqfQ0.qsnlUdmA33t8CNJ7MZEb.u7fiZHLYzDkJp
- R7CqEVLGN75U+1JXxFUY.xEEBcRCqhOEkz2bENEWnh4pbh0wY25EefbD6EmW
- UA6Ip8wFLyuFXx+Wrp8m6iff1B86W7bqJO9+mx8er4E3.abCLrYdA16sBuHx
- vKT6BlpIGQIhL55W7oicf3ayv3ixQCm4aQuY1HZUPQWY+cASx2WZ3f1fICuz
- vj5R5ZbM1y8gXYN4dIXaYGq4NhQvS5MmcDADy+S.j8CQ78vk7Q7gtPDX3kFh
- 3NGaAsYBUAO.8N1U4WKycxbQdrWxJdXd10gNIO+hkUMmm.CZwknu7JbNUYUq
- 0sOsTsI1QudDtjw0t+xZ85wWZd80tMCiiMADNX4UzrcSeK23su87IANqmA7j
- tiRzoXi2YRh67ldAk79gPmTe3YKuoY0qdEDV3X8xylCJMTN45JIakB7uY8XW
- uVr3PO8wWwEoTW8lsfraX7ZqzZDDXCRqNkztHsGCYpIDDAOqxDpMVUMKcOrp
- 942acPvx2NPocMC1wQZ8glRn3myTykVaEUNLoEeJjVaAevA4EAZnsNgkeyO+
- 3rEZB7f0DTazDcQTNmdt8aACGi1QOWnMmd+.6YjMHH19OB5gKsMF877x8wsJ
- hN97JSnSfLUXGUoj6ujWXd6Pk1SAC+Pkogm.tZ.1lX1qL.pe6PE11DPeMMZ2
- .P0K+3peBt3NskC
- -----------end_max5_patcher-----------
-
-
- */
