@@ -23,6 +23,7 @@ void loop() {
   // the accelerometer was connected to the analog pins 0,1,2
   // while there was a button available at analog pin 5, and for some reason,
   // it was connected in a way that when depressed, it sent HIGH signals
+  // so if we pressed the button, we'd expect a HIGH state, but we got LOW state instead
   buttonState = analogRead(5) == 0 ? 1 : 0; // read the button state, if pressed (LOW or 0), then it is HIGH
 
   // Time to output it!
