@@ -1,32 +1,12 @@
-  // mouseover serial
-
-  // Demonstrates how to send data to the Arduino I/O board, in order to
-  // turn ON a light if the mouse is over a square and turn it off
-  // if the mouse is not.
-
-  // created 2003-4
-  // based on examples by Casey Reas and Hernando Barragan
-  // modified 30 Aug 2011
-  // by Tom Igoe
-  // This example code is in the public domain.
-
-
+  // This code is based of the "Mouseover Serial" example code from Arduino.cc
 
   import processing.serial.*;
-
-  float boxX;
-  float boxY;
-  int boxSize = 20;
-  boolean mouseOverBox = false;
 
   Serial port;
 
   void setup() {
-  size(200, 200);
-  boxX = width/2.0;
-  boxY = height/2.0;
-  rectMode(RADIUS);
-
+  // The two comment blocks below here are from the example code.
+  
   // List all the available serial ports in the output pane.
   // You will need to choose the port that the Arduino board is
   // connected to from this list. The first port in the list is
@@ -37,53 +17,48 @@
   // Open the port that the Arduino board is connected to (in this case #0)
   // Make sure to open the port at the same speed Arduino is using (9600bps)
   port = new Serial(this, Serial.list()[2], 9600);
-
   }
 
-  String val;
+  String val;           // The string we get from reading the serial connection
   
-  int buttonState;
-  float fvalX, fvalY;
+  float fvalX, fvalY;   // Float factor values determinating the result
 
   void draw()
   {
-    if (port.available() > 0)
-      val = port.readStringUntil('\n');
+    if (port.available() > 0)           // is data being sent?
+      val = port.readStringUntil('\n'); // read the serial connection
     
-    if (val != null)
+    if (val != null)                    // if there was no data, skip
     {
-      println(val);
+      println(val);                     // debugging purposes
       
-      int splitterIndex = val.indexOf(";");
+      int splitterIndex = val.indexOf(";"); // where is the ';' located? we need this for splitting the string into more useable data
       
-      /*
-      float valX = float(val.substring(0, splitterIndex - 1));
-      float valY = float(val.substring(splitterIndex, val.length()-1));
-      */
+      // since start off with incomplete strings because there are no UDP or TCP data transfer protocols,
+      // sometimes the data are cut, try processing the data, else spit and try again
+      //
+      // the string is formated like this:
+      // X:<valX>;Y:<valY>
+      // for example it'd be
+      // X:-0.45;Y:0.12     where valX = -0.45 and valY = 0.12
       try
       {
-        String button = val.substring(1,2);
-        String valX = val.substring(2+2, splitterIndex);
-        String valY = val.substring(splitterIndex + (1+2), val.length()-1);
+        String valX = val.substring(2, splitterIndex);  // get the X value
+        String valY = val.substring(splitterIndex + (1+2), val.length()-1); // get the Y value
         
-        fvalX = float(valX);
-        fvalY = float(valY);
-        buttonState = int(button);
+        fvalX = float(valX); // parse the string into a number
+        fvalY = float(valY); // same here
         
-        println("Value for X: " + fvalX + "\nValue for Y: " + fvalY);
-        println("Should be drawn?: " + (boolean(buttonState) ? "Yes" : "No"));
+        println("Value for X: " + fvalX + "\nValue for Y: " + fvalY); // output it! for debugging needs
       }
       catch (Exception exception)
       {
-        println(exception);
+        println(exception); // Hah, we caught a fault, no problem!
       }
       
-      background(51);
+      background(51); // Paint it dark.
       
-      if (buttonState == 1)
-      {
-        stroke(244);
-        line(100, 100, 200*fvalX, 200*fvalY);
-      }
+      stroke(244);    // Makes the line being drawn white
+      line(100, 100, 200*fvalX, 200*fvalY); // the line starts at {100,100} and ends at {200*fvalX,200*fvalY}
     }
   }
