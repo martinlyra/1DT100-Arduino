@@ -57,8 +57,8 @@ void setupMotorPins() {
 }
 
 void setup() {
-  analogWrite(CHANNEL_A_PWA, 0);      // another safe to make sure the car won't run away soon as the device is turned on
-  analogWrite(CHANNEL_B_PWA, 0);
+  analogWrite(CHANNEL_A_PWM, 0);      // another safe to make sure the car won't run away soon as the device is turned on
+  analogWrite(CHANNEL_B_PWM, 0);
   
   setupPins();
   setupMotorPins();
