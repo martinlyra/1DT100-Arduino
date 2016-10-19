@@ -23,12 +23,12 @@
 // DC MOTOR CHANNEL
 #define CHANNEL_A_DIR 12
 #define CHANNEL_A_BRK 9
-#define CHANNEL_A_PWR 3
+#define CHANNEL_A_PWA 3
 
 // DC SERVO CHANNEL
 #define CHANNEL_B_DIR 13
 #define CHANNEL_B_BRK 8
-#define CHANNEL_B_PWR 11
+#define CHANNEL_B_PWA 11
 
 char motorSpeed = 0; // max 255 - used for analogWrite() for the speed of the motor
 
@@ -57,8 +57,8 @@ void setupMotorPins() {
 }
 
 void setup() {
-  analogWrite(CHANNEL_A_PWR, 0);      // another safe to make sure the car won't run away soon as the device is turned on
-  analogWrite(CHANNEL_B_PWR, 0);
+  analogWrite(CHANNEL_A_PWA, 0);      // another safe to make sure the car won't run away soon as the device is turned on
+  analogWrite(CHANNEL_B_PWA, 0);
   
   setupPins();
   setupMotorPins();
@@ -77,11 +77,11 @@ void motorWrite(int state) {
   if (state == FORWARD){
     digitalWrite(CHANNEL_A_DIR, HIGH);        // send power
     digitalWrite(CHANNEL_A_BRK, LOW);         // disable the brake (turn on)
-    analogWrite(CHANNEL_A_PWR, motorSpeed);   // send power based on duty cycle
+    analogWrite(CHANNEL_A_PWA, motorSpeed);   // send power based on duty cycle
   } else if (state == REVERSE){
     digitalWrite(CHANNEL_A_DIR, LOW);         // receive power (don't send power) -- reverse the direction
     digitalWrite(CHANNEL_A_BRK, LOW);
-    analogWrite(CHANNEL_A_PWR, motorSpeed);
+    analogWrite(CHANNEL_A_PWA, motorSpeed);
   } else
     digitalWrite(CHANNEL_A_BRK, HIGH);        // enable the brake (turn off)
 }
@@ -90,11 +90,11 @@ void servoWrite(int state) {
   if (state == LEFT) {
     digitalWrite(CHANNEL_B_DIR, HIGH);
     digitalWrite(CHANNEL_B_BRK, LOW);
-    analogWrite(CHANNEL_B_PWR, 255);
+    analogWrite(CHANNEL_B_PWA, 255);
   } else if (state == RIGHT) {
     digitalWrite(CHANNEL_B_DIR, LOW);
     digitalWrite(CHANNEL_B_BRK, LOW);
-    analogWrite(CHANNEL_B_PWR, 255);
+    analogWrite(CHANNEL_B_PWA, 255);
   } else
     digitalWrite(CHANNEL_B_BRK, HIGH);
 }
